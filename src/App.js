@@ -9,6 +9,8 @@ class App extends Component {
       error: null,
       isLoaded: false,
       images: [],
+      searched: false,
+      searchParam: "",
     };
   }
 
@@ -33,21 +35,43 @@ class App extends Component {
       );
   }
 
+  onSearchInputChange = (e) => {
+    this.setState({
+      searchParam: e.target.value,
+      searched: true,
+      isLoaded: true,
+    });
+    fetch(
+      `https://api.unsplash.com/photos/?client_id=LqP1bNdvX8VncEmSaVp23fXv_ZzZf-drxT4V0cS1eGM&page=1&per_page=30&order_by=latest&query=${e.target.value}`
+    )
+      .then((res) => res.json())
+      .then((json) => this.setState({ images: json, isLoaded: false }));
+  };
+
   render() {
-    const { error, isLoaded, images } = this.state;
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    } else if (!isLoaded) {
-      return <div>Loading...</div>;
-    } else {
-      return (
-        <div className="App-header">
-          {images.map((image) => (
-            <Image image={image} key={image.id} />
-          ))}
+    const { error, isLoaded, images, searchParam } = this.state;
+
+    return (
+      <div className="App-header">
+        <div>
+          <input
+            value={searchParam}
+            onChange={this.onSearchInputChange}
+            type="text"
+          />
         </div>
-      );
-    }
+        <br />
+        {error && <div>Error: {error.message}</div>}
+        {!isLoaded && <div>Loading...</div>}
+        {
+          <div className="img-section">
+            {images.map((image) => (
+              <Image image={image} key={image.id} />
+            ))}
+          </div>
+        }
+      </div>
+    );
   }
 }
 
